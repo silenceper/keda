@@ -166,7 +166,7 @@ func TestHuaweiCloudeyeGetMetricSpecForScaling(t *testing.T) {
 		metricSpec := mockHuaweiCloudeyeScaler.GetMetricSpecForScaling()
 		metricName := metricSpec[0].External.Metric.Name
 		if metricName != testData.name {
-			t.Error("Wrong External metric source name:", metricName)
+			t.Error("Wrong External metric source name:", metricName, "wanted:", testData.name)
 		}
 	}
 }

@@ -16,6 +16,8 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/metrics/pkg/apis/external_metrics"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+
+	kedautil "github.com/kedacore/keda/pkg/util"
 )
 
 type artemisScaler struct {
@@ -30,7 +32,7 @@ type artemisMetadata struct {
 	brokerAddress      string
 	username           string
 	password           string
-	restApiTemplate    string
+	restAPITemplate    string
 	queueLength        int
 }
 
@@ -70,9 +72,9 @@ func parseArtemisMetadata(resolvedEnv, metadata, authParams map[string]string) (
 	meta.queueLength = defaultArtemisQueueLength
 
 	if val, ok := metadata["restApiTemplate"]; ok && val != "" {
-		meta.restApiTemplate = metadata["restApiTemplate"]
+		meta.restAPITemplate = metadata["restApiTemplate"]
 	} else {
-		meta.restApiTemplate = defaultRestAPITemplate
+		meta.restAPITemplate = defaultRestAPITemplate
 	}
 
 	if metadata["managementEndpoint"] == "" {
@@ -156,7 +158,7 @@ func (s *artemisScaler) getMonitoringEndpoint() string {
 		"<<brokerName>>", s.metadata.brokerName,
 		"<<brokerAddress>>", s.metadata.brokerAddress)
 
-	monitoringEndpoint := replacer.Replace(s.metadata.restApiTemplate)
+	monitoringEndpoint := replacer.Replace(s.metadata.restAPITemplate)
 
 	return monitoringEndpoint
 }
@@ -201,7 +203,7 @@ func (s *artemisScaler) GetMetricSpecForScaling() []v2beta2.MetricSpec {
 	targetMetricValue := resource.NewQuantity(int64(s.metadata.queueLength), resource.DecimalSI)
 	externalMetric := &v2beta2.ExternalMetricSource{
 		Metric: v2beta2.MetricIdentifier{
-			Name: fmt.Sprintf("%s-%s-%s", "artemis", s.metadata.brokerName, s.metadata.queueName),
+			Name: kedautil.NormalizeString(fmt.Sprintf("%s-%s-%s", "artemis", s.metadata.brokerName, s.metadata.queueName)),
 		},
 		Target: v2beta2.MetricTarget{
 			Type:         v2beta2.AverageValueMetricType,

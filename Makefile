@@ -151,7 +151,7 @@ adapter: generate gofmt govet
 # Generate manifests e.g. CRD, RBAC etc.
 .PHONY: manifests
 manifests: controller-gen
-	$(CONTROLLER_GEN) crd:crdVersions=v1beta1 rbac:roleName=keda-operator paths="./..." output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) crd:crdVersions=v1 rbac:roleName=keda-operator paths="./..." output:crd:artifacts:config=config/crd/bases
 	# withTriggers is only used for duck typing so we only need the deepcopy methods
 	# However operator-sdk generate doesn't appear to have an option for that
 	# until this issue is fixed: https://github.com/kubernetes-sigs/controller-tools/issues/398
@@ -199,20 +199,17 @@ pkg/scalers/liiklus/mocks/mock_liiklus.go: pkg/scalers/liiklus/LiiklusService.pb
 # Run go fmt against code
 .PHONY: gofmt
 gofmt:
-	go fmt ./...
+	gofmt -l -w -s .
 
 # Run go vet against code
 .PHONY: govet
 govet:
 	go vet ./...
 
-# Run revive against code
-.PHONY: revive
-revive:
-	revive -config revive.toml -formatter friendly \
-		-exclude pkg/scalers/liiklus/mocks/mock_liiklus.go \
-		-exclude vendor/... \
-		./...
+# Run golangci against code
+.PHONY: golangci
+golangci:
+	golangci-lint run
 
 ##################################################
 # Clientset                                      #
